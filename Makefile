@@ -108,7 +108,13 @@ else
 GVRUN_TARGET		:= $(target_platform)_v3
 endif
 
-GVRUN_COMMON_ARGS ?= --work-dir $(GVSOC_WORK_DIR) --attr $(target_platform)_v3/spatz_romfile=$(BIN_ABS_PATH)/bootrom/spatz_init.bin --trace-level=trace --trace=kill-module
+ifeq ($(spatz), 1)
+SPATZ_ROMFILE = --attr $(target_platform)_v3/spatz_romfile=$(BIN_ABS_PATH)/bootrom/spatz_init.bin
+else
+SPATZ_ROMFILE = 
+endif
+
+GVRUN_COMMON_ARGS ?= --work-dir $(GVSOC_WORK_DIR) $(SPATZ_ROMFILE) --trace-level=trace --trace=kill-module
 GVRUN_ARGS ?= $(GVRUN_COMMON_ARGS) run
 GVRUN_PROFILE_ARGS ?= $(GVRUN_COMMON_ARGS) --vcd --event=.* run
 # ID of the specific tile you want to write traces of, currently writes the memory mapped idma-ctrl
