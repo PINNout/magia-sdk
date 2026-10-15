@@ -44,7 +44,7 @@ set(MAGIA_CV32_EXTRA_INCLUDE_DIRS
 set(CV32_ARCH rv CACHE STRING "CV32 ARCH prefix")
 set(CV32_XLEN 32 CACHE STRING "CV32 XLEN")
 if (${COMPILER_NAME} STREQUAL "riscv64-unknown-elf-gcc")
-set(CV32_XTEN imc_xcvalu_xcvbi_xcvbitmanip_xcvhwlp_xcvmac_xcvmem_xcvsimd_xcvelw_zfinx_zhinxmin CACHE STRING "PULP32 ISA extensions")
+set(CV32_XTEN imc_xcvalu_xcvbi_xcvmac_xcvsimd_xcvelw_zfinx_zhinxmin CACHE STRING "PULP32 ISA extensions")
 else ()
 set(CV32_XTEN imcxgap9 CACHE STRING "PULP32 ISA extensions")
 endif ()

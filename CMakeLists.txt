@@ -55,7 +55,7 @@ endif()
 set(ABI ilp32)
 
 if (CONTROL_CORE STREQUAL "CV32E40P")
-    set(ISA rv32imc_xcvalu_xcvbi_xcvbitmanip_xcvhwlp_xcvmac_xcvmem_xcvsimd_xcvelw_zfinx_zhinxmin)
+    set(ISA rv32imc_xcvalu_xcvbi_xcvmac_xcvsimd_xcvelw_zfinx_zhinxmin)
     set(CV32E40P 1)
     set(CV32E40X 0)
 elseif (CONTROL_CORE STREQUAL "CV32E40X")
