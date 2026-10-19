@@ -3,6 +3,7 @@
 #include "eventunit.h"
 #include "fsync.h"
 #include "idma.h"
+#include "performance_utils.h"
 #include "tile.h"
 
 #include "kernels_compare_utils.h"
@@ -12,8 +13,6 @@
 
 int init_fsync()
 {
-    fsync_config_t fsync_cfg;
-
     fsync_init();
 
     return 0;
@@ -21,8 +20,6 @@ int init_fsync()
 
 int init_idma()
 {
-    idma_config_t idma_cfg;
-
     idma_init();
 
     return 0;
@@ -30,8 +27,6 @@ int init_idma()
 
 int init_event_unit()
 {
-    eu_config_t eu_cfg;
-
     eu_init();
     eu_spatz_init(0);
     eu_fsync_init(0);
@@ -87,6 +82,8 @@ int main(void)
     int ret;
 
     hid = get_hartid();
+
+    perf_init();
 
     ret = init_fsync();
     if (ret) {
