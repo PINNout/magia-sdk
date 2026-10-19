@@ -146,7 +146,7 @@ GVSOC2PERFETTO_INCLUDE ?= (?x) \
   | magia-noc\.ni_\d+_\d+\.(narrow_req|wide_req)$$ \
   | L2-mem\.(req_addr|req_size|req_is_write)$$
 
-.PHONY: gvsoc build format run_profiling gvsoc2perfetto clean rtl-clean set_mesh
+.PHONY: gvsoc build format run_profiling gvsoc2perfetto clean rtl-clean set_mesh llvm deploy deploy_with_spatz, gvsoc_init, gvsoc_uv, gvsoc_venv
 
 # Build the Rust VCD->Perfetto converter (cargo tracks its own incremental state).
 gvsoc2perfetto: $(GVSOC2PERFETTO_BIN)

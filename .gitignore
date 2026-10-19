@@ -45,6 +45,9 @@ tests/magia/mesh/mm_generator/include/*
 # Editor
 .vscode/
 llvm/
+.cache/
+result
+result-man
 
 disassemblies/
 
