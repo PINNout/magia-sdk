@@ -5,8 +5,6 @@
 #include "idma.h"
 #include "tile.h"
 
-#include "kernel_idma_utils.h"
-
 #include "instancenorm_fp16_spatz.h"
 #include "instancenorm_fp16_spatz_params.h"
 #include "instancenorm_fp16_spatz_task_bin.h"
@@ -105,9 +103,6 @@ static int init_input_params(void *params,
 
     mmio_fp16(instancenorm_params->eps) = epsilon;
 
-    idma_ctrl_init();
-    eu_ctrl_init();
-
     /* Per-channel gamma/beta (full num_channels, contiguous) are needed by every tile. */
     idma_memcpy_1d(
         0, (uint32_t)scale, (uint32_t)instancenorm_params->gamma, num_channels * sizeof(float16));
@@ -134,7 +129,6 @@ static int offload_spatz_task(void *params)
 {
     int ret;
 
-    eu_ctrl_init();
     spatz_run_task_with_params(INSTANCENORM_FP16_SPATZ_TASK, (uint32_t)params);
 
     ret = eu_spatz_wait(WFE);
@@ -166,9 +160,6 @@ static int store_result(void *params, float16 *output)
 
     if (inst_len == 0)
         return 0;
-
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* This tile's output instances [inst_start, inst_end) are contiguous in L2. */
     idma_memcpy_1d(1,

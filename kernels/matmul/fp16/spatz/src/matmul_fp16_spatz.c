@@ -5,8 +5,6 @@
 #include "idma.h"
 #include "tile.h"
 
-#include "kernel_idma_utils.h"
-
 #include "matmul_fp16_spatz.h"
 #include "matmul_fp16_spatz_params.h"
 #include "matmul_fp16_spatz_task_bin.h"
@@ -84,9 +82,6 @@ static int init_input_params(
     if (batch_len == 0)
         return 0;
 
-    idma_ctrl_init();
-    eu_ctrl_init();
-
     /* batched == 1: this tile's batches are a contiguous L2 block -> a 1D transfer.
        batched == 0 (shared/broadcast weight): replicate the single 2D matrix into every
        batch slot with a 2D transfer whose source stride is 0. The Spatz task overwrites
@@ -126,8 +121,6 @@ static int offload_spatz_task(void *params)
 {
     int ret;
 
-    eu_ctrl_init();
-
     spatz_run_task_with_params(MATMUL_FP16_SPATZ_TASK, (uint32_t)params);
 
     ret = eu_spatz_wait(WFE);
@@ -159,9 +152,6 @@ static int store_result(void *params, float16 *Y)
 
     if (batch_len == 0)
         return 0;
-
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* Y is always batched: this tile's batches are a contiguous L2 block -> a 1D transfer. */
     idma_memcpy_1d(1,

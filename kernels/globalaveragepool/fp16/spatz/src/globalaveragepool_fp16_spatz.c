@@ -5,8 +5,6 @@
 #include "idma.h"
 #include "tile.h"
 
-#include "kernel_idma_utils.h"
-
 #include "globalaveragepool_fp16_spatz.h"
 #include "globalaveragepool_fp16_spatz_params.h"
 #include "globalaveragepool_fp16_spatz_task_bin.h"
@@ -78,9 +76,6 @@ static int init_input_params(void *params, const float16 *X)
     if (len == 0)
         return 0;
 
-    idma_ctrl_init();
-    eu_ctrl_init();
-
     /* This tile's channels [start, start+len) are contiguous in L2. The Spatz task writes
        every output (one average per channel), so shard_Y is not zeroed here. */
     idma_memcpy_1d(0,
@@ -96,7 +91,6 @@ static int offload_spatz_task(void *params)
 {
     int ret;
 
-    eu_ctrl_init();
     spatz_run_task_with_params(GLOBALAVERAGEPOOL_FP16_SPATZ_TASK, (uint32_t)params);
 
     ret = eu_spatz_wait(WFE);
@@ -126,9 +120,6 @@ static int store_result(void *params, float16 *Y)
 
     if (len == 0)
         return 0;
-
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* This tile's outputs [start, start+len) are contiguous in L2. */
     idma_memcpy_1d(1, (uint32_t)(Y + start), (uint32_t)gap_params->shard_Y, len * sizeof(float16));

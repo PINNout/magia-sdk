@@ -5,8 +5,6 @@
 #include "idma.h"
 #include "tile.h"
 
-#include "kernel_idma_utils.h"
-
 #include "hardsigmoid_fp16_spatz.h"
 #include "hardsigmoid_fp16_spatz_params.h"
 #include "hardsigmoid_fp16_spatz_task_bin.h"
@@ -85,9 +83,6 @@ static int init_input_params(void *params, const float16 *X)
     if (len == 0)
         return 0;
 
-    idma_ctrl_init();
-    eu_ctrl_init();
-
     /* This tile's slice [start, start+len) is contiguous in L2. The Spatz task writes every
        output (Y = hardsigmoid(X)), so shard_Y is not zeroed here. */
     idma_memcpy_1d(
@@ -101,7 +96,6 @@ static int offload_spatz_task(void *params)
 {
     int ret;
 
-    eu_ctrl_init();
     spatz_run_task_with_params(HARDSIGMOID_FP16_SPATZ_TASK, (uint32_t)params);
 
     ret = eu_spatz_wait(WFE);
@@ -131,9 +125,6 @@ static int store_result(void *params, float16 *dst)
 
     if (len == 0)
         return 0;
-
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* This tile's output slice [start, start+len) is contiguous in L2. */
     idma_memcpy_1d(
