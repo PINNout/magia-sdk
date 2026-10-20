@@ -5,8 +5,6 @@
 #include "idma.h"
 #include "tile.h"
 
-#include "kernel_idma_utils.h"
-
 #include "conv2dgemm_fp16_spatz.h"
 #include "conv2dgemm_fp16_spatz_params.h"
 #include "conv2dgemm_fp16_spatz_task_bin.h"
@@ -138,8 +136,6 @@ static int init_input_params(void *params, const float16 *W, const float16 *B)
     M           = conv_params->M;
     N           = conv_params->N;
 
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* GEMM does Y = alpha * A @ B + beta * C; beta gates the bias term. */
     mmio_fp16(conv_params->alpha) = (float16)1.0f;
@@ -228,8 +224,6 @@ static int offload_spatz_task(void *params)
 {
     int ret;
 
-    eu_ctrl_init();
-
     spatz_run_task_with_params(CONV2DGEMM_FP16_SPATZ_TASK, (uint32_t)params);
 
     ret = eu_spatz_wait(WFE);
@@ -265,9 +259,6 @@ static int store_result(void *params, float16 *Y)
 
     if (M == 0)
         return 0;
-
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* shard_Y is [n_batches, M, N] contiguous in L1; each batch's M*N block goes to
        Y[b, oc_start:oc_start+M, :] which is contiguous within a batch but c_out*N apart

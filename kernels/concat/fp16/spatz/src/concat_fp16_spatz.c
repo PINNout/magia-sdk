@@ -5,8 +5,6 @@
 #include "idma.h"
 #include "tile.h"
 
-#include "kernel_idma_utils.h"
-
 #include "concat_fp16_spatz.h"
 #include "concat_fp16_spatz_params.h"
 #include "concat_fp16_spatz_task_bin.h"
@@ -98,9 +96,6 @@ static int init_input_params(void *params, const float16 **inputs)
     if (iter_len == 0)
         return 0;
 
-    idma_ctrl_init();
-    eu_ctrl_init();
-
     /* Each input's iterations are contiguous in L2, so this tile's [iter_start, iter_end)
        slice is a single contiguous block per input. The Spatz task fully writes the output
        shard (in0 || in1 || ... per iteration), so shard_output is not zeroed here. */
@@ -121,8 +116,6 @@ static int init_input_params(void *params, const float16 **inputs)
 static int offload_spatz_task(void *params)
 {
     int ret;
-
-    eu_ctrl_init();
 
     spatz_run_task_with_params(CONCAT_FP16_SPATZ_TASK, params);
 
@@ -164,9 +157,6 @@ static int store_result(void *params, float16 *concat_result, const uint32_t ite
     out_len = 0;
     for (uint32_t i = 0; i < num_inputs; i++)
         out_len += len_input[i];
-
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* This tile's output rows [iter_start, iter_start+iter_len) are contiguous in L2. */
     idma_memcpy_1d(1,

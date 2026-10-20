@@ -5,8 +5,6 @@
 #include "idma.h"
 #include "tile.h"
 
-#include "kernel_idma_utils.h"
-
 #include "convtranspose_fp16_spatz.h"
 #include "convtranspose_fp16_spatz_params.h"
 #include "convtranspose_fp16_spatz_task_bin.h"
@@ -100,10 +98,7 @@ static int init_input_params(void *params, const float16 *X, const float16 *W)
     uint32_t total_w =
         conv_params->c_in * conv_params->c_out_g * conv_params->kernel_h * conv_params->kernel_w;
     uint32_t total_out = conv_params->iter_len * conv_params->h_out * conv_params->w_out;
-
-    idma_ctrl_init();
-    eu_ctrl_init();
-
+    
     /* Every tile needs the full input and full weights, both contiguous in L2 -> 1D transfers. */
     idma_memcpy_1d(0, (uint32_t)X, (uint32_t)conv_params->shard_X, total_in * sizeof(float16));
     eu_idma_wait_a2o(WFE);
@@ -122,7 +117,6 @@ static int offload_spatz_task(void *params)
 {
     int ret;
 
-    eu_ctrl_init();
     spatz_run_task_with_params(CONVTRANSPOSE_FP16_SPATZ_TASK, params);
 
     ret = eu_spatz_wait(WFE);
@@ -150,9 +144,6 @@ static int store_result(void *params, float16 *Y)
 
     if (iter_len == 0)
         return 0;
-
-    idma_ctrl_init();
-    eu_ctrl_init();
 
     /* This tile's output planes [iter_start, iter_start+iter_len) are contiguous in L2. */
     idma_memcpy_1d(1,
