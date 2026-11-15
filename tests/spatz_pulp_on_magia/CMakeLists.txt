@@ -1,3 +1,4 @@
 add_subdirectory(hello_spatz_pulp)
 add_subdirectory(multi_task)
 #add_subdirectory(nn_is_bench)
+add_subdirectory(pinn_spatz_bench)
